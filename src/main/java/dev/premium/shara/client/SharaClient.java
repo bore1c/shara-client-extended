@@ -1,6 +1,5 @@
 package dev.premium.shara.client;
 
-import com.google.gson.Gson;
 import dev.premium.shara.client.config.Config;
 import dev.premium.shara.client.modules.AutoClicker;
 import dev.premium.shara.client.modules.KillAura;
@@ -13,8 +12,6 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.atomic.AtomicLong;
 
 public class SharaClient implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger("shara-client-extended");
@@ -88,28 +85,27 @@ public class SharaClient implements ClientModInitializer {
                 drawContext.drawTextWithShadow(MC.textRenderer, "ESP (nearby):", 10, y, 0xFFFFFF);
                 y += 10;
                 if (MC.world != null) {
-                    MC.world.getEntities().forEach(entity -> {
-                        if (entity == MC.player) return;
-                        String name = entity.getEntityName();
-                        double dist = entity.squaredDistanceTo(MC.player.getX(), MC.player.getY(), MC.player.getZ());
-                        String line = String.format("%s - %.1fm", name, Math.sqrt(dist));
+                    for (var entity : MC.world.getEntities()) {
+                        if (entity == MC.player) continue;
+                        String name = entity.getDisplayName().getString();
+                        double distSq = entity.squaredDistanceTo(MC.player.getX(), MC.player.getY(), MC.player.getZ());
+                        String line = String.format("%s - %.1fm", name, Math.sqrt(distSq));
                         drawContext.drawTextWithShadow(MC.textRenderer, line, 12, y, 0xFFFF00);
                         y += 10;
-                    });
+                    }
                 }
             }
 
             y += 6;
             drawContext.drawTextWithShadow(MC.textRenderer, "Modules:", 10, y, 0x00FFFF);
             y += 10;
-            if (config.killaura) drawContext.drawTextWithShadow(MC.textRenderer, "Killaura: ON", 12, y, 0x00FF00); else drawContext.drawTextWithShadow(MC.textRenderer, "Killaura: OFF", 12, y, 0xFF0000);
+            drawContext.drawTextWithShadow(MC.textRenderer, "Killaura: " + (config.killaura ? "ON" : "OFF"), 12, y, config.killaura ? 0x00FF00 : 0xFF0000);
             y += 10;
-            if (config.autoClicker) drawContext.drawTextWithShadow(MC.textRenderer, "AutoClicker: ON", 12, y, 0x00FF00); else drawContext.drawTextWithShadow(MC.textRenderer, "AutoClicker: OFF", 12, y, 0xFF0000);
+            drawContext.drawTextWithShadow(MC.textRenderer, "AutoClicker: " + (config.autoClicker ? "ON" : "OFF"), 12, y, config.autoClicker ? 0x00FF00 : 0xFF0000);
             y += 10;
-            if (config.xray) drawContext.drawTextWithShadow(MC.textRenderer, "X-Ray: ON", 12, y, 0x00FF00); else drawContext.drawTextWithShadow(MC.textRenderer, "X-Ray: OFF", 12, y, 0xFF0000);
+            drawContext.drawTextWithShadow(MC.textRenderer, "X-Ray: " + (config.xray ? "ON" : "OFF"), 12, y, config.xray ? 0x00FF00 : 0xFF0000);
             y += 10;
-            if (config.autoArmor) drawContext.drawTextWithShadow(MC.textRenderer, "AutoArmor: ON", 12, y, 0x00FF00); else drawContext.drawTextWithShadow(MC.textRenderer, "AutoArmor: OFF", 12, y, 0xFF0000);
-
+            drawContext.drawTextWithShadow(MC.textRenderer, "AutoArmor: " + (config.autoArmor ? "ON" : "OFF"), 12, y, config.autoArmor ? 0x00FF00 : 0xFF0000);
         });
 
         LOGGER.info("Initialized. Config path: {}", Config.getConfigFile().getAbsolutePath());
