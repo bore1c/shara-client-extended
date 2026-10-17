@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "shara-client-extended",
+  "version": "${version}",
+  "name": "Shara Client Extended",
+  "description": "Fabric client with basic cheat modules: ESP (list), Killaura, X-Ray toggle, AutoArmor (basic), AutoClicker, HUD and JSON config.",
+  "authors": [
+    "bore1c"
+  ],
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.premium.shara.client.SharaClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "minecraft": "~1.21.4",
+    "fabric-api": "*"
+  }
+}
