@@ -3,8 +3,8 @@ package dev.premium.shara.client.modules;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.Hand;
 
-import java.util.Comparator;
 import java.util.function.Supplier;
 
 public class KillAura {
@@ -19,22 +19,28 @@ public class KillAura {
 
     public void tick() {
         if (!enabled.get()) return;
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.world == null || mc.interactionManager == null) return;
 
         double r = range.get();
+        Entity target = null;
+        double bestSq = Double.MAX_VALUE;
 
-        Entity target = mc.world.getEntities().stream()
-                .filter(e -> e instanceof LivingEntity)
-                .filter(e -> e != mc.player)
-                .filter(e -> !e.isRemoved())
-                .filter(e -> e.squaredDistanceTo(mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= r * r)
-                .min(Comparator.comparingDouble(e -> e.squaredDistanceTo(mc.player.getX(), mc.player.getY(), mc.player.getZ())))
-                .orElse(null);
+        for (Entity e : mc.world.getEntities()) {
+            if (!(e instanceof LivingEntity)) continue;
+            if (e == mc.player) continue;
+            if (e.isRemoved()) continue;
+
+            double sq = e.squaredDistanceTo(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+            if (sq <= r * r && sq < bestSq) {
+                bestSq = sq;
+                target = e;
+            }
+        }
 
         if (target != null) {
             try {
                 mc.interactionManager.attackEntity(mc.player, target);
-                mc.player.swingHand(net.minecraft.util.Hand.MAIN_HAND);
+                mc.player.swingHand(Hand.MAIN_HAND);
             } catch (Exception ignored) {
             }
         }
