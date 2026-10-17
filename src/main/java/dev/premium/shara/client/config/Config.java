@@ -36,11 +36,12 @@ public class Config {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     public static File getConfigFile() {
-        String configDir = System.getProperty("user.home");
-        // Try to detect Minecraft config location. On Windows this will be %appdata%/.minecraft
+        // Prefer APPDATA so the config goes to C:\Users\<user>\AppData\Roaming\.minecraft
         String home = System.getenv("APPDATA");
-        if (home == null) home = configDir;
-        File dir = new File(home, ".minecraft/config");
+        if (home == null || home.isEmpty()) {
+            home = System.getProperty("user.home");
+        }
+        File dir = new File(home, ".minecraft");
         if (!dir.exists()) dir.mkdirs();
         return new File(dir, "shara-client-extended.json");
     }
