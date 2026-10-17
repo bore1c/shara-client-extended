@@ -1,8 +1,9 @@
 package dev.premium.shara.client.modules;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
 
 import java.util.function.Supplier;
 
@@ -20,7 +21,7 @@ public class AutoClicker {
 
     public void tick() {
         if (!enabled.get()) return;
-        if (mc.player == null || mc.currentScreen != null) return;
+        if (mc.player == null || mc.currentScreen != null || mc.interactionManager == null) return;
 
         boolean attackHeld = mc.options.attackKey.isPressed();
         if (!attackHeld) return;
@@ -30,17 +31,15 @@ public class AutoClicker {
 
         lastClick = now;
         try {
-            // swing and perform attack on the entity under crosshair if any
-            if (mc.crosshairTarget != null && mc.crosshairTarget.getType() == net.minecraft.client.render.Camera.PositionedEntityType.ENTITY) {
-                // try to attack the targeted entity
-                var entityHit = mc.crosshairTarget.entity;
+            if (mc.crosshairTarget != null && mc.crosshairTarget.getType() == HitResult.Type.ENTITY) {
+                var entityHit = ((EntityHitResult) mc.crosshairTarget).getEntity();
                 if (entityHit != null) {
                     mc.interactionManager.attackEntity(mc.player, entityHit);
                     mc.player.swingHand(Hand.MAIN_HAND);
                     return;
                 }
             }
-            // otherwise, just swing hand (left-click in air)
+
             mc.player.swingHand(Hand.MAIN_HAND);
         } catch (Exception ignored) {
         }
